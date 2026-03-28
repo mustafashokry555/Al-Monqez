@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Http\Requests\Api\Main\Auth;
+
+use App\Http\Helpers\ApiResponse;
+use App\Http\Helpers\CustomFailedValidation;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class ResetPasswordRequest extends FormRequest
+{
+    use ApiResponse, CustomFailedValidation;
+
+    protected $stopOnFirstFailure = true;
+
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'phone' => [
+                'required',
+                'string',
+                Rule::exists("users")->where(function ($query) {
+                    return $query->whereIn("role_id", ['3', '4', '5']);
+                }),
+            ],
+            'code' => [
+                'required',
+                Rule::exists('otps')->where(function ($query) {
+                    return $query->where([['phone', $this->phone], ['type', 1]]);
+                })
+            ],
+            'password' => 'required|string|min:8|max:25|confirmed',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'code.exists' => __('messages.wrong_code'),
+        ];
+    }
+}

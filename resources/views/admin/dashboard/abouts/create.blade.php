@@ -1,0 +1,123 @@
+@extends('layouts.master')
+@section('title')
+    {{ __('admin.new_about') }}
+@endsection
+@section('css')
+    <!--Internal  Datetimepicker-slider css -->
+    <link href="{{ URL::asset('assets/plugins/amazeui-datetimepicker/css/amazeui.datetimepicker.css') }}" rel="stylesheet">
+    <link href="{{ URL::asset('assets/plugins/jquery-simple-datetimepicker/jquery.simple-dtpicker.css') }}" rel="stylesheet">
+    <link href="{{ URL::asset('assets/plugins/pickerjs/picker.min.css') }}" rel="stylesheet">
+    <!-- Internal Spectrum-colorpicker css -->
+    <link href="{{ URL::asset('assets/plugins/spectrum-colorpicker/spectrum.css') }}" rel="stylesheet">
+@endsection
+
+@section('content')
+    @component('components.breadcrumb')
+        @slot('li_1')
+            <a class="btn bg-primary text-white btn-sm ml-2" title="{{ __('admin.back') }}" href="{{ route('admin.abouts.index') }}">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        @endslot
+        @slot('title')
+            {{ __('admin.new_about') }}
+        @endslot
+    @endcomponent
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title m-0">{{ __('admin.add_about') }}</h4>
+                </div>
+                <div class="card-body">
+                    <form class="needs-validation" action="{{ route('admin.abouts.store') }}" method="POST">
+                        @csrf
+                        @include('layouts.session')
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-switch">
+                                        <input type="checkbox" name="show"
+                                            class="form-control d-none @error('show') is-invalid @enderror" />
+                                        <div class="main-toggle main-toggle-success" style="cursor: pointer">
+                                            <span data-on-label="{{ __('admin.show') }}"
+                                                data-off-label="{{ __('admin.hide') }}"></span>
+                                        </div>
+                                    </label>
+                                    @error('show')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        @foreach ($languages as $language)
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="title_{{ $language }}">{{ __('admin.title') }}
+                                            ({{ __("admin.$language") }})
+                                            <span class="text-danger fw-bolder">*</span></label>
+                                        <input type="input"
+                                            class="form-control @error('title_{{ $language }}') is-invalid @enderror"
+                                            id="title_{{ $language }}" name="title_{{ $language }}"
+                                            placeholder="{{ __('admin.title') }}" value="{{ old("title_$language") }}"
+                                            required>
+                                        @error('title_{{ $language }}')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label for="description_{{ $language }}"
+                                            class="form-label">{{ __('admin.description') }}
+                                            ({{ __("admin.$language") }})<span
+                                                class="text-danger fw-bolder">*</span></label>
+                                        <textarea class="form-control @error('description_{{ $language }}') is-invalid @enderror"
+                                            id="description_{{ $language }}" name="description_{{ $language }}">{{ old("description_$language") }}</textarea>
+                                        @error('description_{{ $language }}')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                        <button class="btn btn-primary" type="submit">{{ __('admin.add_about') }}</button>
+                    </form>
+                </div>
+            </div>
+            <!-- end card -->
+        </div> <!-- end col -->
+    </div>
+@endsection
+@section('js')
+    <!--Internal  Datepicker js -->
+    <script src="{{ URL::asset('assets/plugins/jquery-ui/ui/widgets/datepicker.js') }}"></script>
+    <!--Internal  jquery.maskedinput js -->
+    <script src="{{ URL::asset('assets/plugins/jquery.maskedinput/jquery.maskedinput.js') }}"></script>
+    <!--Internal  spectrum-colorpicker js -->
+    <script src="{{ URL::asset('assets/plugins/spectrum-colorpicker/spectrum.js') }}"></script>
+    <!-- Internal Select2.min js -->
+    <script src="{{ URL::asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+    <!--Internal Ion.rangeSlider.min js -->
+    <script src="{{ URL::asset('assets/plugins/ion-rangeslider/js/ion.rangeSlider.min.js') }}"></script>
+    <!--Internal  jquery-simple-datetimepicker js -->
+    <script src="{{ URL::asset('assets/plugins/amazeui-datetimepicker/js/amazeui.datetimepicker.min.js') }}"></script>
+    <!-- Ionicons js -->
+    <script src="{{ URL::asset('assets/plugins/jquery-simple-datetimepicker/jquery.simple-dtpicker.js') }}"></script>
+    <!--Internal  pickerjs js -->
+    <script src="{{ URL::asset('assets/plugins/pickerjs/picker.min.js') }}"></script>
+    <!-- Internal form-elements js -->
+    <script src="{{ URL::asset('assets/js/form-elements.js') }}"></script>
+    <!-- Internal ckeditor js -->
+    <script src="{{ URL::asset('assets/libs/@ckeditor/@ckeditor.min.js') }}"></script>
+    <script src="{{ URL::asset('assets/js/ckeditor.js') }}"></script>
+@endsection
