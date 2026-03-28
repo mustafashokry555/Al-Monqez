@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('tabbyoffer')->group(function () {
-    
+
     // === روابط التوجيه (Redirects) ===
     // هذه الروابط يستدعيها المتصفح (Redirect) لذا يجب أن تكون GET
     Route::get('success', [TabbyController::class, 'success'])->name('tabbyoffer.success');
@@ -38,9 +38,9 @@ Route::prefix('tabbyoffer')->group(function () {
     // هذه تظل POST لأنك أنت من تستدعيها داخلياً أو عبر Webhook
     Route::post('{paymentId}/capture', [TabbyController::class, 'capture']);
     Route::post('{paymentId}/refund', [TabbyController::class, 'refund']);
-// Webhooks (تبقى خارج الـ prefix إذا كان الرابط مختلفاً)
-Route::post('/webhooks/tabby', [TabbyController::class, 'handleWebhook']);
-Route::post('/webhooks/tabbyLive', [TabbyController::class, 'handleWebhook']);
+    // Webhooks (تبقى خارج الـ prefix إذا كان الرابط مختلفاً)
+    Route::post('/webhooks/tabby', [TabbyController::class, 'handleWebhook']);
+    Route::post('/webhooks/tabbyLive', [TabbyController::class, 'handleWebhook']);
 });
 
 
@@ -50,7 +50,7 @@ Route::post('/webhooks/tabbyLive', [TabbyController::class, 'handleWebhook']);
 Route::get('/tamaraoffer/success', [TamaraController::class, 'success']);
 Route::get('/tamaraoffer/failure', [TamaraController::class, 'failure']);
 Route::get('/tamaraoffer/cancel', [TamaraController::class, 'cancel']);
-Route::post('/tamaraoffer/webhook', [TamaraController::class, 'handle']); // 
+Route::post('/tamaraoffer/webhook', [TamaraController::class, 'handle']); //
 
 
 
@@ -109,13 +109,9 @@ Route::middleware('change_language')->group(function () {
                     Route::post('/apply-coupon', [OfferController::class, 'applyCoupon']);
 
 
-                Route::post('/tabby-payment-offer/{offer_id?}', [OfferController::class, 'tabbyPaymentOffer']);
-    Route::post('/tamara-payment-offer/{offer_id?}', [OfferController::class, 'tamaraPaymentOffer']);
-            
+                    Route::post('/tabby-payment-offer/{offer_id?}', [OfferController::class, 'tabbyPaymentOffer']);
+                    Route::post('/tamara-payment-offer/{offer_id?}', [OfferController::class, 'tamaraPaymentOffer']);
                 });
-            
-            
-             
             });
 
             Route::middleware('is_worker', 'is_accepted')->group(function () {
@@ -125,7 +121,6 @@ Route::middleware('change_language')->group(function () {
 
                 Route::group(['prefix' => '/offers'], function () {
                     Route::post('/make', [OfferController::class, 'make']);
-                     
                 });
 
                 Route::group(['prefix' => '/orders'], function () {
@@ -134,9 +129,5 @@ Route::middleware('change_language')->group(function () {
                 });
             });
         });
-    
-   
-    
-    
     });
 });

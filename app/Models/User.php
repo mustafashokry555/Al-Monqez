@@ -145,13 +145,13 @@ class User extends Authenticatable
     {
         $whereConditions = [['role_id', '7']];
 
-        if (auth()->user()->role_id == 7) {
+        if (optional(auth()->user())->role_id == 7) {
             $whereConditions[] = ['id', auth()->id()];
         }
 
         return [
             'company_id' => [
-                (auth()->user()->role_id == 7) ? 'required' : 'nullable',
+                (optional(auth()->user())->role_id == 7) ? 'required' : 'nullable',
                 Rule::exists('users', 'id')->where(function ($query) use ($whereConditions) {
                     $query->where($whereConditions);
                 }),
