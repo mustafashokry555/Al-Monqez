@@ -31,7 +31,8 @@
                     <h4 class="card-title m-0">{{ __('admin.add_product') }}</h4>
                 </div>
                 <div class="card-body">
-                    <form class="needs-validation" action="{{ route('store_app.admin.products.store') }}" method="POST" enctype="multipart/form-data">
+                    <form class="needs-validation" action="{{ route('store_app.admin.products.store') }}" method="POST"
+                        enctype="multipart/form-data">
                         @csrf
                         @include('layouts.session')
                         <div class="row">
@@ -68,7 +69,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row @if(auth()->user()->role_id == 6) d-none @endif">
+                        <div class="row @if (auth()->user()->role_id == 6) d-none @endif">
                             <div class="col-12">
                                 <div class="mb-3">
                                     <label class="form-label" for="store_id">{{ __('admin.stores') }}
@@ -103,6 +104,26 @@
                                         </option>
                                     </select>
                                     @error('classification_id')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="patch_id">{{ __('admin.patch') }}</label>
+                                    <select name="patch_id" class="form-control @error('patch_id') is-invalid @enderror"
+                                        id="patch_id">
+                                        <option value="" selected>{{ __('admin.none') }}</option>
+                                        @foreach ($patches as $patch)
+                                            <option value="{{ $patch->id }}" @selected(old('patch_id') == $patch->id)>
+                                                {{ $patch->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('patch_id')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
@@ -256,7 +277,8 @@
                     },
                     success: function(response) {
                         response.classifications.forEach(function(classification) {
-                            let selected = (classification.id == '{{ old('classification_id') }}') ? 'selected' : '';
+                            let selected = (classification.id == '{{ old('classification_id') }}') ?
+                                'selected' : '';
                             classificationSelect.append(
                                 `<option value="${classification.id}" ${selected}>${classification.name}</option>`
                             );

@@ -18,6 +18,7 @@ class ProductController extends Controller
         $language = app()->getLocale();
         $products = StoreProduct::query()->select(
             'store_products.id',
+            'store_products.patch_id',
             'users.name as store_name',
             "store_products.name_$language AS name",
             "store_products.description_$language AS description",
@@ -44,9 +45,10 @@ class ProductController extends Controller
         }
 
         $products = $products->where([['store_products.displayed', '1']])
+            ->with('patch')
             ->orderBy('store_products.created_at', 'DESC')
             ->get();
-
+        // return $products;
         return $this->apiResponse(200, 'products', null, [
             'products' => ProductResource::collection($products),
         ]);

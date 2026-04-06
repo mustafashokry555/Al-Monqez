@@ -113,6 +113,14 @@ return [
     'hide_product' => 'تم إخفاء المنتج بنجاح',
     'delete_product_image' => 'تم حذف صورة المنتج بنجاح',
 
+    // Patches
+    'add_patch' => 'تم إضافة الباتش بنجاح',
+    'edit_patch' => 'تم تعديل الباتش بنجاح',
+    'delete_patch' => 'تم حذف الباتش بنجاح',
+    'show_patch' => 'تم عرض الباتش بنجاح',
+    'hide_patch' => 'تم إخفاء الباتش بنجاح',
+    'delete_patch_image' => 'تم حذف صورة الباتش بنجاح',
+
     // Services
     'add_service' => 'تم إضافة الخدمة بنجاح',
     'edit_service' => 'تم تعديل الخدمة بنجاح',

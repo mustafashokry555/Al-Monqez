@@ -233,6 +233,16 @@ return [
     'delete_classification' => 'درجہ بندی حذف کریں',
     'delete_classification_message' => 'کیا آپ اس درجہ بندی کو حذف کرنا چاہتے ہیں؟',
 
+
+    'patch' => 'پیچ',
+    'patches' => 'پیچز',
+    'all_patches' => 'تمام پیچز',
+    'add_patch' => 'پیچ شامل کریں',
+    'new_patch' => 'نیا پیچ',
+    'edit_patch' => 'پیچ میں ترمیم کریں',
+    'delete_patch' => 'پیچ حذف کریں',
+    'delete_patch_message' => 'کیا آپ واقعی اس پیچ کو حذف کرنا چاہتے ہیں؟',
+    'confirm' => 'کیا آپ یقین ہیں؟',
     'product' => 'مصنوعہ',
     'products' => 'مصنوعات',
     'all_products' => 'تمام مصنوعات',

@@ -21,6 +21,12 @@ class ProductResource extends JsonResource
             ]),
             'name' => $this->name,
             'description' => $this->description,
+            'badge' => $this->whenLoaded('patch', function () {
+                return [
+                    'id' => $this->patch->id,
+                    'name' => $this->patch->name
+                ];
+            }),
             'image' => $this->imageLink,
             'price' => $this->price,
             'sale_price' => $this->sale_price,

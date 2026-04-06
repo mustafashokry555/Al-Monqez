@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\StoreApp\Products\UpdateProductRequest;
 use App\Http\Requests\Admin\StoreApp\Products\ValidateProductRequest;
 use App\Models\StoreProduct;
 use App\Models\StoreProductImage;
+use App\Models\StoreProductPatch;
 use App\Models\User;
 
 class ProductController extends Controller
@@ -57,7 +58,9 @@ class ProductController extends Controller
 
         $stores = $stores->get();
 
-        return view('admin.store-app.products.create', compact('languages', 'stores'));
+        $patches = StoreProductPatch::select('id', "name_".app()->getLocale()." as name")->where('displayed', 1)->get();
+
+        return view('admin.store-app.products.create', compact('languages', 'stores', 'patches'));
     }
 
     public function store(AddProductRequest $request)
@@ -73,6 +76,7 @@ class ProductController extends Controller
         $data = array_merge($data, [
             'store_id' => $request->store_id,
             'classification_id' => $request->classification_id,
+            'patch_id' => $request->patch_id ?? null,
             'image' => $this->uploadFile($request, 'store_products'),
             'price' => $request->price,
             'sale_price' => $request->sale_price,
@@ -114,7 +118,9 @@ class ProductController extends Controller
         $product = $product->findOrFail($id);
         $stores = $stores->get();
 
-        return view('admin.store-app.products.edit', compact('product', 'languages', 'stores'));
+        $patches = StoreProductPatch::select('id', "name_".app()->getLocale()." as name")->where('displayed', 1)->get();
+
+        return view('admin.store-app.products.edit', compact('product', 'languages', 'stores', 'patches'));
     }
 
     public function update(UpdateProductRequest $request)
@@ -130,6 +136,7 @@ class ProductController extends Controller
         $data = array_merge($data, [
             'store_id' => $request->store_id,
             'classification_id' => $request->classification_id,
+            'patch_id' => $request->patch_id ?? null,
             'image' => $this->uploadFile($request, 'store_products', $product),
             'price' => $request->price,
             'sale_price' => $request->sale_price,

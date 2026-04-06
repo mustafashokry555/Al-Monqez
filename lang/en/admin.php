@@ -233,6 +233,16 @@ return [
     'delete_classification' => 'Delete Classification',
     'delete_classification_message' => 'Are you sure you want to delete this classification?',
 
+    'patch' => 'Patch',
+    'patches' => 'Patches',
+    'all_patches' => 'All Patches',
+    'add_patch' => 'Add Patch',
+    'new_patch' => 'New Patch',
+    'edit_patch' => 'Edit Patch',
+    'delete_patch' => 'Delete Patch',
+    'delete_patch_message' => 'Are you sure you want to delete this patch?',
+    'confirm' => 'Are you sure?',
+
     'product' => 'Product',
     'products' => 'Products',
     'all_products' => 'All Products',

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Models\StoreProductPatch;
 
 class StoreProduct extends Model
 {
@@ -19,6 +20,11 @@ class StoreProduct extends Model
     public function images()
     {
         return $this->hasMany(StoreProductImage::class, 'product_id', 'id');
+    }
+
+    public function patch()
+    {
+        return $this->belongsTo(StoreProductPatch::class, 'patch_id', 'id');
     }
 
     /*----------------------------------------------------------------------------------------*/
@@ -55,6 +61,7 @@ class StoreProduct extends Model
                     $query->where('store_id', $request->store_id);
                 }),
             ],
+            'patch_id' => 'nullable|exists:store_product_patches,id',
             'image' => 'required|mimes:jpg,jpeg,png,webp',
             'price' => 'required|numeric|min:0|max:1000000',
             'sale_price' => 'nullable|numeric|min:0|max:1000000|lt:price',

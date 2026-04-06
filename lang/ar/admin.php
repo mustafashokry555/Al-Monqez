@@ -48,6 +48,8 @@ return [
     'total_in_delivery_orders' => 'عدد الطلبات قيد التوصيل',
     'total_delivered_orders' => 'عدد الطلبات التي تم توصيلها',
 
+    'save' => 'حفظ',
+
     'total_categories' => 'عدد الأقسام',
     'total_sub_categories' => 'عدد الأقسام الفرعية',
     'total_services' => 'عدد الخدمات',
@@ -233,6 +235,17 @@ return [
     'delete_classification' => 'حذف التصنيف',
     'delete_classification_message' => 'هل أنت متأكد من حذف هذا التصنيف؟',
 
+
+    'none' => 'لا يوجد',
+    'patch' => 'باتش',
+    'patches' => 'باتشز',
+    'all_patches' => 'كل الباتشات',
+    'add_patch' => 'اضافة باتش',
+    'new_patch' => 'باتش جديد',
+    'edit_patch' => 'تعديل الباتش',
+    'delete_patch' => 'حذف الباتش',
+    'delete_patch_message' => 'هل أنت متأكد أنك تريد حذف هذا الباتش؟',
+    'confirm' => 'هل أنت متأكد؟',
     'product' => 'المنتج',
     'products' => 'المنتجات',
     'all_products' => 'جميع المنتجات',

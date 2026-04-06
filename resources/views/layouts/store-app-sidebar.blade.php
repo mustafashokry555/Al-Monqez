@@ -232,6 +232,27 @@
                     </li>
                 @endif
 
+                    @if (isset($super_admin) || isset($patch_create) || isset($patch_edit) || isset($patch_delete))
+                        <li class="slide">
+                            <a class="side-menu__item" data-toggle="slide" href="javascript:void();"><i
+                                    class="fa fa-tags ml-3" style="font-size: 16px"></i><span
+                                    class="side-menu__label">{{ __('admin.patches') }}</span><i
+                                    class="angle fe fe-chevron-down"></i></a>
+                            <ul class="slide-menu">
+                                @if (isset($super_admin) || isset($patch_edit) || isset($patch_delete))
+                                    <li><a class="slide-item"
+                                            href="{{ route('store_app.admin.patches.index') }}">{{ __('admin.all_patches') }}</a>
+                                    </li>
+                                @endif
+                                @if (isset($super_admin) || isset($patch_create))
+                                    <li><a class="slide-item"
+                                            href="{{ route('store_app.admin.patches.create') }}">{{ __('admin.add_patch') }}</a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </li>
+                    @endif
+
                 @if (isset($super_admin) || isset($product_create) || isset($product_edit) || isset($product_delete))
                     <li class="slide">
                         <a class="side-menu__item" data-toggle="slide" href="javascript:void();"><i
