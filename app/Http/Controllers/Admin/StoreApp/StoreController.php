@@ -157,9 +157,11 @@ class StoreController extends Controller
     {
         $store = User::findOrFail($request->store_id);
 
-        $store->forceDelete();
+        // Soft-delete the store (User uses SoftDeletes)
         $this->deleteFile($store->image);
+        $store->delete();
 
+        // Do not remove uploaded files on soft-delete so the record can be restored intact.
         session()->flash('success', __('messages.delete_store'));
         return redirect()->back();
     }
