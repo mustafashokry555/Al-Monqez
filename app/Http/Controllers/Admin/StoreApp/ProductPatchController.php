@@ -11,8 +11,7 @@ class ProductPatchController extends Controller
     public function index()
     {
         $language = app()->getLocale();
-        $patches = StoreProductPatch::select('id', "name_$language as name", 'displayed')
-            ->orderBy('id', 'desc')
+        $patches = StoreProductPatch::orderBy('id', 'desc')
             ->paginate(10);
 
         return view('admin.store-app.patches.index', compact('patches'));

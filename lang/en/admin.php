@@ -376,6 +376,7 @@ return [
     'store_order_control' => 'Control Store Orders',
     'withdraw_control' => 'Control Withdraw Requests',
     'chat_control' => 'Chat Control',
+    'patches_control' => 'Control Patches',
 
     // Forms & Tables
     'all' => 'All',

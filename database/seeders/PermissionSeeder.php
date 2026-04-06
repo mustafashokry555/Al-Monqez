@@ -38,6 +38,7 @@ class PermissionSeeder extends Seeder
             'product_create', 'product_edit', 'product_delete',
             'coupon_create', 'coupon_edit', 'coupon_delete',
             'store_order_control',
+            'patches_control',
         ];
 
         $data = [];

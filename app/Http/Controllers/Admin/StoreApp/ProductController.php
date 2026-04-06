@@ -58,7 +58,7 @@ class ProductController extends Controller
 
         $stores = $stores->get();
 
-        $patches = StoreProductPatch::select('id', "name_".app()->getLocale()." as name")->where('displayed', 1)->get();
+        $patches = StoreProductPatch::where('displayed', 1)->get();
 
         return view('admin.store-app.products.create', compact('languages', 'stores', 'patches'));
     }
@@ -118,7 +118,7 @@ class ProductController extends Controller
         $product = $product->findOrFail($id);
         $stores = $stores->get();
 
-        $patches = StoreProductPatch::select('id', "name_".app()->getLocale()." as name")->where('displayed', 1)->get();
+        $patches = StoreProductPatch::where('displayed', 1)->get();
 
         return view('admin.store-app.products.edit', compact('product', 'languages', 'stores', 'patches'));
     }

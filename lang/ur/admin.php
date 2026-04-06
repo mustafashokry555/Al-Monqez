@@ -355,6 +355,7 @@ return [
     'service_create' => 'سروس شامل کریں',
     'service_edit' => 'سروس ترمیم کریں',
     'service_delete' => 'سروس حذف کریں',
+    'patches_control' => 'پریکٹس کنٹرول',
     'city_create' => 'شہر شامل کریں',
     'city_edit' => 'شہر ترمیم کریں',
     'city_delete' => 'شہر حذف کریں',

@@ -358,6 +358,7 @@ return [
     'service_create' => 'إضافة خدمات',
     'service_edit' => 'تعديل الخدمات',
     'service_delete' => 'حذف الخدمات',
+    'patches_control' => 'التحكم في التصحيحات',
     'city_create' => 'إضافة مدن',
     'city_edit' => 'تعديل المدن',
     'city_delete' => 'حذف المدن',

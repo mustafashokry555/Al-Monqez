@@ -139,22 +139,22 @@ Route::middleware('auth', 'access_store_app')->as('store_app.')->group(function 
         /*---------------------------------------------------------------------------------------------------------------*/
 
         Route::group(['prefix' => 'patches', 'as' => 'patches.'], function () {
-            Route::group(['middleware' => 'has_ability:patch_edit|patch_delete'], function () {
+            Route::group(['middleware' => 'has_ability:patches_control'], function () {
                 Route::get('/', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'index'])->name('index');
             });
 
-            Route::group(['middleware' => 'has_ability:patch_create'], function () {
+            Route::group(['middleware' => 'has_ability:patches_control'], function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'create'])->name('create');
                 Route::post('/store', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'store'])->name('store');
             });
 
-            Route::group(['middleware' => 'has_ability:patch_edit'], function () {
+            Route::group(['middleware' => 'has_ability:patches_control'], function () {
                 Route::get('/edit/{id}', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'edit'])->name('edit');
                 Route::put('/update', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'update'])->name('update');
                 Route::put('/display', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'display'])->name('display');
             });
 
-            Route::delete('/destroy', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'destroy'])->name('destroy')->middleware('has_ability:patch_delete');
+            Route::delete('/destroy', [\App\Http\Controllers\Admin\StoreApp\ProductPatchController::class, 'destroy'])->name('destroy')->middleware('has_ability:patches_control');
         });
 
         /*---------------------------------------------------------------------------------------------------------------*/

@@ -32,7 +32,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title m-0">{{ __('admin.all_patches') }}</h4>
-                    @if (isset($super_admin) || isset($patch_create))
+                    @if (isset($super_admin) || isset($patches_control))
                         <a href="{{ route('store_app.admin.patches.create') }}" class="btn btn-primary button-icon"><i class="fe fe-plus ml-2 font-weight-bolder"></i>{{ __('admin.add_patch') }}</a>
                     @endif
                 </div>
@@ -68,7 +68,7 @@
                                     </td>
                                     <td class="align-middle">
                                         <div class="d-flex">
-                                            @if (isset($super_admin) || isset($patch_edit))
+                                            @if (isset($super_admin) || isset($patches_control))
                                                 <form class="d-inline ml-2" action="{{ route('store_app.admin.patches.display') }}" method="POST">
                                                     @csrf
                                                     @method('PUT')
@@ -81,14 +81,14 @@
                                                     <i class="fas fa-pencil-alt"></i>
                                                 </a>
                                             @endif
-                                            @if (isset($super_admin) || isset($patch_delete))
+                                            @if (isset($super_admin) || isset($patches_control))
                                                 <button type="button" class="modal-effect btn btn-outline-secondary bg-danger text-dark btn-sm ml-2" title="{{ __('admin.delete') }}" data-effect="effect-newspaper" data-toggle="modal" href="#myModal{{ $patch->id }}">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             @endif
                                         </div>
 
-                                        @if (isset($super_admin) || isset($patch_delete))
+                                        @if (isset($super_admin) || isset($patches_control))
                                             <div class="modal" id="myModal{{ $patch->id }}">
                                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                                     <div class="modal-content modal-content-demo">
