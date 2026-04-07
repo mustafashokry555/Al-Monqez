@@ -68,6 +68,7 @@ class ProductController extends Controller
             'store_products.price',
             'store_products.sale_price',
             'store_products.quantity AS max_quantity',
+            'store_products.visits',
             DB::raw('CASE WHEN store_carts.id IS NOT NULL THEN store_carts.quantity ELSE 0 END AS quantity'),
             DB::raw('CASE WHEN store_favorites.id IS NOT NULL THEN 1 ELSE 0 END AS is_favorite')
         )
@@ -87,6 +88,8 @@ class ProductController extends Controller
             })
             ->where([['store_products.displayed', '1']])
             ->findOrFail($id);
+
+        $product->increment('visits');
 
         return $this->apiResponse(200, 'product', null, [
             'product' => new ProductResource($product),
