@@ -68,7 +68,8 @@ class AuthController extends Controller
                     'access_token' => $token->plainTextToken,
                     'role_id' => (int) $user->role_id,
                     'is_verified' => $user->verified,
-                    'is_blocked' => $user->blocked
+                    'is_blocked' => $user->blocked,
+                    'is_accepted' => $user->accepted,
                 ]);
             }
 
@@ -89,7 +90,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'image' => $this->uploadFile($request, 'users'),
-            'accepted' => ($request->role_id == '3') ? 0 : 1
+            'accepted' => (in_array($request->role_id, ['3', '5'])) ? 0 : 1
         ]);
 
         if ($request->role_id == '3') {
