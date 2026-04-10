@@ -9,6 +9,7 @@ return [
     'ar' => 'Arabic',
     'en' => 'English',
     'ur' => 'Urdu',
+    'ur' => 'Urdu',
 
     // Main
     'main_title' => 'Universal Savior',

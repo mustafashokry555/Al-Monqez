@@ -74,12 +74,14 @@ class FavoriteController extends Controller
             'store_products.image',
             'store_products.price',
             'store_products.sale_price',
+            'store_products.patch_id',
             DB::raw('1 AS is_favorite')
         )
             ->join('store_favorites', 'store_favorites.product_id', '=', 'store_products.id')
             ->join('users', 'users.id', '=', 'store_products.store_id')
             ->where('store_favorites.user_id', auth()->id())
             ->where([['store_products.displayed', '1']])
+            ->with('patch')
             ->orderBy('store_favorites.created_at', 'DESC')
             ->get();
 

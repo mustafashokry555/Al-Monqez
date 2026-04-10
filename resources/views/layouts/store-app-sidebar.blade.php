@@ -86,6 +86,11 @@
                                         href="{{ route('store_app.admin.drivers.index') }}">{{ __('admin.all_delivery_drivers') }}</a>
                                 </li>
                             @endif
+                            @if (isset($super_admin) || isset($driver_edit))
+                                <li><a class="slide-item"
+                                        href="{{ route('store_app.admin.drivers.joining_requests.index') }}">{{ __('admin.joining_requests') }}</a>
+                                </li>
+                            @endif
                             @if (isset($super_admin) || isset($driver_create))
                                 <li><a class="slide-item"
                                         href="{{ route('store_app.admin.drivers.create') }}">{{ __('admin.add_delivery_driver') }}</a>

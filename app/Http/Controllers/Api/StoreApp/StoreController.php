@@ -75,6 +75,7 @@ class StoreController extends Controller
             "store_products.name_$language AS name",
             "store_products.description_$language AS description",
             'store_products.image',
+            'store_products.patch_id',
             'store_products.price',
             'store_products.sale_price',
             DB::raw('CASE WHEN store_favorites.id IS NOT NULL THEN 1 ELSE 0 END AS is_favorite')
@@ -85,6 +86,7 @@ class StoreController extends Controller
                     ->where('store_favorites.user_id', '=', auth()->id() ?? 0);
             })
             ->where([['store_products.store_id', $id], ['store_products.displayed', '1']])
+            ->with('patch')
             ->orderBy('store_products.created_at', 'DESC')
             ->get();
 

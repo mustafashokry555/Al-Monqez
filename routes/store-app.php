@@ -57,6 +57,11 @@ Route::middleware('auth', 'access_store_app')->as('store_app.')->group(function 
                 Route::get('/', [DriverController::class, 'index'])->name('index');
             });
 
+            Route::group(['prefix' => 'joining-requests', 'as' => 'joining_requests.', 'middleware' => 'has_ability:driver_edit'], function () {
+                Route::get('/', [DriverController::class, 'joiningRequests'])->name('index');
+                Route::put('/accept', [DriverController::class, 'acceptJoiningRequest'])->name('accept');
+            });
+
             Route::group(['middleware' => 'has_ability:driver_create'], function () {
                 Route::get('/create', [DriverController::class, 'create'])->name('create');
                 Route::post('/store', [DriverController::class, 'store'])->name('store');

@@ -40,10 +40,51 @@ class DriverController extends Controller
             ->leftJoin('user_vehicle_registrations', 'users.id', '=', 'user_vehicle_registrations.user_id')
             ->leftJoin('user_accounts', 'users.id', '=', 'user_accounts.user_id')
             ->where('role_id', '5')
+            ->where('users.accepted', '1')
             ->orderBy('created_at', 'DESC')
             ->paginate(10);
 
         return view('admin.store-app.drivers.index', compact('drivers'));
+    }
+
+    /*-----------------------------------------------------------------------------------------------*/
+
+    public function joiningRequests()
+    {
+        $drivers = User::select(
+            'users.id',
+            'users.name',
+            'users.email',
+            'users.phone',
+            'users.image',
+            'user_vehicle_registrations.id_number',
+            'user_vehicle_registrations.vehicle_license_image',
+            'user_vehicle_registrations.driving_license_image',
+            'user_accounts.bank_name',
+            'user_accounts.iban_number',
+            'users.accepted',
+            'users.created_at'
+        )
+            ->leftJoin('user_vehicle_registrations', 'users.id', '=', 'user_vehicle_registrations.user_id')
+            ->leftJoin('user_accounts', 'users.id', '=', 'user_accounts.user_id')
+            ->where('users.role_id', '5')
+            ->where('users.accepted', '0')
+            ->orderBy('users.created_at', 'DESC')
+            ->paginate(10);
+
+        return view('admin.store-app.drivers.joining_requests', compact('drivers'));
+    }
+
+    public function acceptJoiningRequest(ValidateDriverRequest $request)
+    {
+        $driver = User::findOrFail($request->driver_id);
+
+        $driver->update([
+            'accepted' => 1
+        ]);
+
+        session()->flash('success', __('messages.accept_driver'));
+        return redirect()->back();
     }
 
     /*-----------------------------------------------------------------------------------------------*/

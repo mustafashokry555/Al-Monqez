@@ -69,6 +69,7 @@ return [
     // Workers
     'create_worker' => 'Worker added successfully',
     'accept_worker' => 'Worker joining request accepted successfully',
+    'accept_driver' => 'Driver joining request accepted successfully',
     'edit_worker' => 'Worker updated successfully',
     'delete_worker' => 'Worker deleted successfully',
     'activate_worker' => 'Worker activated successfully',

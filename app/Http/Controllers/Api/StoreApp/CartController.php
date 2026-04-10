@@ -60,6 +60,7 @@ class CartController extends Controller
             'store_products.image',
             'store_products.price',
             'store_products.sale_price',
+            'store_products.patch_id',
             'store_products.quantity AS max_quantity',
             'store_carts.quantity'
         )
@@ -67,6 +68,7 @@ class CartController extends Controller
             ->where('store_products.store_id', $store_id)
             ->where([['store_products.displayed', '1']])
             ->where('store_carts.user_id', '=', auth()->id())
+            ->with('patch')
             ->get();
 
         $suggestedProducts = StoreProduct::select(
@@ -75,6 +77,7 @@ class CartController extends Controller
             "store_products.description_$language AS description",
             'store_products.image',
             'store_products.price',
+            'store_products.patch_id',
             'store_products.sale_price',
             'store_products.quantity AS max_quantity',
             DB::raw('0 AS quantity'),
@@ -83,6 +86,7 @@ class CartController extends Controller
             ->where('store_products.store_id', $store_id)
             ->where([['store_products.displayed', '1']])
             ->whereNull('store_carts.id')
+            ->with('patch')
             ->limit(5)
             ->get();
 

@@ -69,6 +69,7 @@ return [
     // Workers
     'create_worker' => 'تم إضافة العامل بنجاح',
     'accept_worker' => 'تم قبول طلب الانضمام للعامل بنجاح',
+    'accept_driver' => 'تم قبول طلب الانضمام للسائق بنجاح',
     'edit_worker' => 'تم تعديل العامل بنجاح',
     'delete_worker' => 'تم حذف العامل بنجاح',
     'activate_worker' => 'تم تفعيل العامل بنجاح',

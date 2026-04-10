@@ -19,13 +19,13 @@ class ProductPatchController extends Controller
 
     public function create()
     {
-        $languages = ['ar', 'en'];
+        $languages = ['ar', 'en', 'ur'];
         return view('admin.store-app.patches.create', compact('languages'));
     }
 
     public function store(Request $request)
     {
-        $languages = ['ar', 'en'];
+        $languages = ['ar', 'en', 'ur'];
         $rules = [];
         foreach ($languages as $lang) {
             $rules["name_$lang"] = 'required|string|max:250';
@@ -49,7 +49,7 @@ class ProductPatchController extends Controller
     public function edit($id)
     {
         $patch = StoreProductPatch::findOrFail($id);
-        $languages = ['ar', 'en'];
+        $languages = ['ar', 'en', 'ur'];
         return view('admin.store-app.patches.edit', compact('patch', 'languages'));
     }
 
@@ -59,6 +59,7 @@ class ProductPatchController extends Controller
             'classification_id' => 'required|exists:store_product_patches,id',
             'name_ar' => 'required|string|max:250',
             'name_en' => 'required|string|max:250',
+            'name_ur' => 'required|string|max:250',
         ]);
 
         $patch = StoreProductPatch::findOrFail($request->classification_id);
@@ -66,6 +67,7 @@ class ProductPatchController extends Controller
         $patch->update([
             'name_ar' => $request->input('name_ar'),
             'name_en' => $request->input('name_en'),
+            'name_ur' => $request->input('name_ur'),
         ]);
 
         session()->flash('success', __('messages.edit_patch'));

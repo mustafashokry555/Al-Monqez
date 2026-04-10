@@ -61,6 +61,7 @@ class ProductController extends Controller
         $language = app()->getLocale();
         $product = StoreProduct::query()->select(
             'store_products.id',
+            'store_products.patch_id',
             'users.name as store_name',
             "store_products.name_$language AS name",
             "store_products.description_$language AS description",
@@ -76,7 +77,7 @@ class ProductController extends Controller
                 'images' => function ($query) {
                     $query->select('product_id', 'path');
                 }
-            ])
+            ])->with('patch')
             ->join('users', 'users.id', '=', 'store_products.store_id')
             ->leftJoin('store_favorites', function ($join) {
                 $join->on('store_favorites.product_id', '=', 'store_products.id')
