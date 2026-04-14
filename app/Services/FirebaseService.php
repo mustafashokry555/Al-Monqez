@@ -74,12 +74,18 @@ class FirebaseService
 
     /*----------------------------------------------------------------------------------------------------*/
 
-    public function notify($title, $body, $devicesTokens, $additionalData = [])
+    public function notify($title, $body, $devicesTokens, $additionalData = [], $ios_sound = "sound.aiff")
     {
         if ($additionalData) {
             $this->convertArrayValuesToString($additionalData);
         }
-
+        $data = [
+            "body" => $body,
+            "title" => $title
+        ];
+        if ($additionalData) {
+            $data = array_merge($data, $additionalData);
+        }
         foreach ($devicesTokens as $token) {
             // This is a very inefficient idea, but due to time constraints, we will keep it like this for now.
             $user_id = User::where('device_token', $token)->value('id');
@@ -95,26 +101,17 @@ class FirebaseService
                 ->where([['messages.read', 0], ['messages.user_id', '!=', $user_id]])
                 ->count();
 
-            $additionalData['title'] = $title;
-            $additionalData['body'] = $body;
-            $additionalData['badge'] = "$totalNotifications";
+            $data['badge'] = "$totalNotifications";
             // This is a very inefficient idea, but due to time constraints, we will keep it like this for now.
 
             $payload = [
                 'message' => [
                     'token' => $token,
-                    // 'notification' => [
-                    //     'title' => $title,
-                    //     'body' => $body,
-                    // ],
-                    'data' => $additionalData,
-                    // 'android' => [
-                    //     'priority' => 'high',
-                    //     'notification' => [
-                    //         'channel_id' => 'default_notification_channel',
-                    //         'sound' => 'sound.mp3',
-                    //     ],
-                    // ],
+                    'data' => $data,
+                    'notification' => [
+                        'title' => $title,
+                        'body' => $body,
+                    ],
                     'apns' => [
                         'headers' => [
                             'apns-priority' => '10',
@@ -122,12 +119,7 @@ class FirebaseService
                         ],
                         'payload' => [
                             'aps' => [
-                                'alert' => [
-                                    'title' => $title,
-                                    'body' => $body,
-                                ],
-                                'badge' => $totalNotifications,
-                                'sound' => 'sound.mp3',
+                                'sound' => $ios_sound,
                             ],
                         ],
                     ],
