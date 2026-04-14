@@ -9,14 +9,13 @@ return [
     'ar' => 'Arabic',
     'en' => 'English',
     'ur' => 'Urdu',
-    'ur' => 'Urdu',
 
     // Main
     'main_title' => 'Universal Savior',
     'copyrights' => 'Designed and developed by',
     'not_found' => 'Not Found',
     'no_data_found' => 'No Data Found',
-    'click_to_view' => '🔊 (Click anywhere to enable sound)',
+    'click_to_view' => 'ðŸ”Š (Click anywhere to enable sound)',
 
     // Authentication
     'signin' => 'Sign In',

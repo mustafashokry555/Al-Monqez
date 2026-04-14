@@ -23,6 +23,7 @@ use App\Services\FirebaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 class OrderController extends Controller
 {
     use ApiResponse, OrderHelper;
@@ -190,7 +191,7 @@ class OrderController extends Controller
                 'total' => $orderSummary['total_price']
             ]);
     }
-       
+
 
             $data = [];
             foreach ($products as $product) {
@@ -216,7 +217,7 @@ $coupon_discount_value=0;
                     'max_discount_amount' => $coupon->max_discount_amount
                 ]);
             }
-        
+
         	if ($request->payment_method == "tabby") {
 
     DB::commit(); // مهم جداً قبل الاستدعاء الخارجي
@@ -228,13 +229,13 @@ $coupon_discount_value=0;
 
     return $this->apiResponse(200, 'بانتظار مراجعة الدفع', $tabbyDetails);
 }
-       
-       
+
+
            if ($request->payment_method == "tamara") {
 
         DB::commit(); // لازم نحفظ الطلب قبل نرسل الطلب لتمارا
 
-       
+
 
         $tamaraDetails = $this->tamaraPayment(
           $request, $order->id
@@ -248,7 +249,7 @@ $coupon_discount_value=0;
             return $this->apiResponse(400, $tamaraDetails['error'] ?? 'خطأ في الاتصال بتمارا');
         }
     }
-       
+
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -263,8 +264,8 @@ DB::commit();
 	public function tabbyPayment(Request $request, $order_id)
 {
     $user = request()->user();
- 
-   
+
+
      $language = app()->getLocale();
 // استرجاع الطلب مع المنتجات
 $order = StoreOrder::query()
@@ -312,7 +313,7 @@ $orderHistoryItems = [];
  $shippingAmount = $order->delivery_charge ?? 0;
     $taxAmount = $order->vat ?? 0;
     $discountAmount = 0;
-	
+
 
 if ($order && $order->products) {
     foreach ($order->products as $product) {
@@ -347,7 +348,7 @@ if ($order && $order->products) {
             "amount" => (string) $total_price,
             "currency" => "SAR",
             "description" => "Order from MMS",
-            "webhook_url" => "https://almonqez-alshamel.com/api/store-app/webhooks/tabby", 
+            "webhook_url" => "https://almonqez-alshamel.com/api/store-app/webhooks/tabby",
             "buyer" => [
                 "phone" => $user->mobile,
                 "email" => $user->email ?? "buyer@yahoo.com",
@@ -426,7 +427,7 @@ if ($order && $order->products) {
 
     // معالجة الاستجابة
     $responseData = $response->json();
-    
+
     // التحقق من وجود web_url
     if(isset($responseData['payment']['status']) && $responseData['payment']['status'] === 'CREATED')
     {
@@ -438,25 +439,25 @@ if ($order && $order->products) {
     'qr_code' => $qr_code
 ];
 
-        
 
-        
+
+
         } else {
             return response()->json([
                 'error' => 'لم يتم العثور على رابط الدفع.'
             ], 400);
-			
-			
+
+
         }
     } else{
          return response()->json([
                 'error' => __('dashboard.'.$responseData['configuration']['products']['installments']['rejection_reason'])
             ], 400);
     }
-    
+
 }
 
-public function tamaraPayment(Request $request, $order_id)
+/*public function tamaraPayment(Request $request, $order_id)
 {
     $user = request()->user();
     $language = app()->getLocale();
@@ -496,7 +497,7 @@ if (!$order) {
  $shippingAmount = $order->delivery_charge ?? 0;
     $taxAmount = $order->vat ?? 0;
     $discountAmount = 0;
-	
+
     // 2. تجهيز قائمة المنتجات (Items) بتنسيق تمارا
     $items = [];
     if ($order && $order->products) {
@@ -516,8 +517,8 @@ if (!$order) {
                     "currency" => "SAR"
                 ],
                 // تمارا تتطلب رابط صورة ومنتج
-                "image_url" => $product->imageLink ?? url('images/default.png'), 
-                "product_url" => url('/') 
+                "image_url" => $product->imageLink ?? url('images/default.png'),
+                "product_url" => url('/')
             ];
         }
     }
@@ -593,6 +594,161 @@ if (!$order) {
         ];
     } else {
         // إرجاع الخطأ لمعرفة السبب
+        return [
+            'error' => $responseData['message'] ?? json_encode($responseData)
+        ];
+    }
+}
+*/
+
+public function tamaraPayment(Request $request, $order_id)
+{
+    $user = request()->user();
+    $language = app()->getLocale();
+
+    // 1. جلب بيانات الطلب
+    $order = StoreOrder::query()
+        ->select(
+            'store_orders.id',
+            'store_orders.store_id',
+            'users.name AS store_name',
+            'store_orders.address',
+            'store_orders.vat',
+            'store_orders.delivery_charge',
+            'store_orders.total',
+            'store_orders.created_at'
+        )
+        ->with([
+            'products' => function ($query) use ($language) {
+                $query->select(
+                    'store_products.id',
+                    'store_order_products.order_id',
+                    "store_products.name_$language AS name",
+                    'store_products.image',
+                    'store_order_products.quantity',
+                    'store_order_products.price'
+                )
+                ->join('store_products', 'store_products.id', '=', 'store_order_products.product_id');
+            }
+        ])
+        ->join('users', 'users.id', '=', 'store_orders.store_id')
+        ->where('store_orders.id', $order_id)
+        ->first();
+
+    if (!$order) {
+        return response()->json(['error' => 'Order not found'], 404);
+    }
+
+    $total_price = $order->total;
+    $shippingAmount = $order->delivery_charge ?? 0;
+    $taxAmount = $order->vat ?? 0;
+    $discountAmount = 0;
+
+    // 2. تجهيز قائمة المنتجات
+    $items = [];
+    if ($order && $order->products) {
+        foreach ($order->products as $product) {
+            $items[] = [
+                "reference_id" => (string) $product->id,
+                "type" => "Physical",
+                "name" => $product->name,
+                "sku" => (string) $product->id,
+                "quantity" => (int) $product->quantity,
+                "unit_price" => [
+                    "amount" => (float) $product->price,
+                    "currency" => "SAR"
+                ],
+                "total_amount" => [
+                    "amount" => (float) ($product->price * $product->quantity),
+                    "currency" => "SAR"
+                ],
+                "image_url" => $product->imageLink ?? url('images/default.png'),
+                "product_url" => url('/')
+            ];
+        }
+    }
+
+    // 3. تجهيز الـ Payload
+    $payload = [
+        "order_reference_id" => (string) $order_id,
+        "total_amount" => [
+            "amount" => (float) $total_price,
+            "currency" => "SAR"
+        ],
+        "description" => "Order #" . $order_id,
+        "country_code" => "SA",
+        "payment_type" => "PAY_BY_INSTALMENTS",
+        "locale" => "ar-SA",
+        "items" => $items,
+        "consumer" => [
+            "first_name" => $user->name ?? "Customer",
+            "last_name" => " ",
+            "email" => $user->email ?? "test@test.com",
+            "phone" => $user->mobile
+        ],
+        "billing_address" => [
+            "first_name" => $user->name ?? "Customer",
+            "last_name" => " ",
+            "line1" => $order->address ?? "Address",
+            "city" => request()->city ?? "Riyadh",
+            "country_code" => "SA"
+        ],
+        "shipping_address" => [
+            "first_name" => $user->name ?? "Customer",
+            "last_name" => " ",
+            "line1" => $order->address ?? "Address",
+            "city" => request()->city ?? "Riyadh",
+            "country_code" => "SA"
+        ],
+        "merchant_url" => [
+            "success" => "https://almonqez-alshamel.com/api/store-app/tamara/success",
+            "failure" => "https://almonqez-alshamel.com/api/store-app/tamara/failure",
+            "cancel" => "https://almonqez-alshamel.com/api/store-app/tamara/cancel",
+            "notification" => "https://almonqez-alshamel.com/api/store-app/tamara/webhook"
+        ],
+        "shipping_amount" => [
+            "amount" => (float) $shippingAmount,
+            "currency" => "SAR"
+        ],
+        "tax_amount" => [
+            "amount" => (float) $taxAmount,
+            "currency" => "SAR"
+        ],
+        "discount" => [
+            "name" => "Coupon Discount",
+            "amount" => [
+                "amount" => (float) $discountAmount,
+                "currency" => "SAR"
+            ]
+        ]
+    ];
+
+    // 4. إرسال الطلب لتمارا لإنشاء رابط جديد دائمًا
+    $response = Http::withToken(env('TAMARA_API_TOKEN'))
+        ->post(env('TAMARA_API_URL') . '/checkout', $payload);
+
+    $responseData = $response->json();
+
+    if ($response->successful() && isset($responseData['checkout_url'])) {
+        // ✅ حفظ رقم تمارا الجديد دائمًا (يستبدل القديم)
+        $order->update([
+            'tamara_order_id' => $responseData['order_id']
+        ]);
+
+        Log::info('Tamara checkout created', [
+            'order_id' => $order_id,
+            'tamara_order_id' => $responseData['order_id']
+        ]);
+
+        return [
+            'checkout_url' => $responseData['checkout_url'],
+            'order_id' => $responseData['order_id']
+        ];
+    } else {
+        Log::error('Tamara checkout failed', [
+            'error' => $responseData
+        ]);
+
         return [
             'error' => $responseData['message'] ?? json_encode($responseData)
         ];

@@ -15,208 +15,191 @@ class TamaraController extends Controller
 
     public function __construct()
     {
-        // استخدام مفاتيح تمارا من ملف .env
-        $this->apiToken = env('TAMARA_API_TOKEN');
-        $this->apiUrl = env('TAMARA_API_URL', 'https://api-sandbox.tamara.co');
+      $this->apiToken = env('TAMARA_API_TOKEN');
+    // الرابط الأساسي بدون v1
+    $this->apiUrl = rtrim(env('TAMARA_API_URL', 'https://api-sandbox.tamara.co'), '/');
     }
 
     /**
-     * Handle Tamara webhook requests
+     * Webhook - استقبال التحديثات من تمارا
      */
     public function handle(Request $request)
     {
-        // تمارا ترسل عادة event_type أو order_status
-        $eventType = $request->input('event_type');
         $orderStatus = $request->input('order_status');
-        
-        Log::info('Tamara webhook received', [
-            'event_type' => $eventType, 
-            'status' => $orderStatus, 
-            'payload' => $request->all()
-        ]);
-
-        try {
-            // التحقق من نجاح الدفع (order_approved)
-            if ($eventType === 'order_approved' || $orderStatus === 'approved') {
-                return $this->handleOrderApproved($request);
-            }
-
-            // حالات الفشل أو الإلغاء
-            if (in_array($orderStatus, ['declined', 'expired', 'canceled'])) {
-                /* 
-                $this->updateOrderStatus(
-                    $request->input('order_reference_id'),
-                    3 // failed
-                ); 
-                */
-                return response()->json(['message' => 'Payment failed or canceled']);
-            }
-
-            Log::warning('Unhandled webhook status', ['status' => $orderStatus]);
-            return response()->json(['message' => 'Unhandled webhook status'], 400);
-
-        } catch (\Exception $e) {
-            Log::error('Tamara webhook error', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Webhook handling error'], 500);
-        }
-    }
-
-    /**
-     * Handle Approved Order (Authorise & Capture)
-     */
-    private function handleOrderApproved(Request $request)
-    {
+        $eventType = $request->input('event_type');
         $tamaraOrderId = $request->input('order_id');
         $myOrderId = $request->input('order_reference_id');
 
-        // 1. خطوة التفويض (Authorise) - إلزامية فوراً
-        $authoriseResponse = $this->authoriseOrder($tamaraOrderId);
-
-        if (!$authoriseResponse) {
-            return response()->json(['message' => 'Authorisation failed'], 400);
-        }
-
-        // 2. جلب تفاصيل الطلب لمعرفة المبلغ (اختياري، يمكنك جلبه من قاعدة بياناتك)
-        // هنا نفترض أنك تريد عمل Capture فوري كما في كود التابي
-        // $order = Order::find($myOrderId);
-        // $amount = $order->total;
-        
-        // للتجربة سنفترض مبلغ ثابت أو نمرره، ولكن في الواقع اجلبه من الـ DB
-        // $captureResponse = $this->capturePayment($tamaraOrderId, $amount);
-
-        // إذا أردت اتباع نفس نظام التابي (Capture فوري):
-        /*
-        if ($this->capturePayment($tamaraOrderId, $amount)) {
-            $this->updateOrderStatus($myOrderId, 2); // Paid
-            return response()->json(['message' => 'Payment captured successfully']);
-        }
-        */
-
-        // إذا اكتفيت بالتفويض (Authorise) الآن وتؤخر الـ Capture للشحن:
-        /*
-        $this->updateOrderStatus($myOrderId, 2); // Paid/Authorized
-        */
-    
-        $order = StoreOrder::findOrFail($myOrderId);
-
-        $order->update([
-            'payment' => 1,
-           
+        Log::info('🔔 Tamara Webhook Received', [
+            'status' => $orderStatus,
+            'event' => $eventType,
+            'tamara_id' => $tamaraOrderId
         ]);
 
-        Log::info('Tamara Order Authorised Successfully', ['order_id' => $tamaraOrderId]);
+        try {
+            // حالة الموافقة
+            if ($orderStatus === 'approved' || $eventType === 'order_approved') {
+                return $this->handleOrderApproved($request);
+            }
 
-        return response()->json(['message' => 'Order authorised successfully']);
+            // حالات الإلغاء أو الفشل
+            if (in_array($orderStatus, ['declined', 'expired', 'canceled'])) {
+                StoreOrder::where('id', $myOrderId)->update(['payment' => 0]);
+                return response()->json(['message' => 'Status updated']);
+            }
+
+            return response()->json(['message' => 'Handled']);
+        } catch (\Exception $e) {
+            Log::error('❌ Webhook Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Error'], 500);
+        }
     }
 
+private function handleOrderApproved(Request $request)
+{
+    // 1. محاولة جلب رقم تمارا بكل المسميات الممكنة
+    $tamaraOrderId = $request->input('order_id')
+                     ?? $request->input('tamara_id')
+                     ?? $request->input('full_payload.order_id');
+
+    // 2. محاولة جلب رقم طلبك الخاص
+    $myOrderId = $request->input('order_reference_id')
+                 ?? $request->input('my_order_id');
+
+    Log::info('🔍 Processing Approval', [
+        'detected_tamara_id' => $tamaraOrderId,
+        'detected_my_id' => $myOrderId
+    ]);
+
+    $order = null;
+
+    // 3. البحث عن الطلب في قاعدة البيانات (الأولوية لرقم تمارا لأنه أضمن)
+    if ($tamaraOrderId) {
+        $order = StoreOrder::where('tamara_order_id', $tamaraOrderId)->first();
+    }
+
+    // إذا لم نجده، نبحث برقم الطلب العادي
+    if (!$order && $myOrderId) {
+        $order = StoreOrder::find($myOrderId);
+    }
+
+    if (!$order) {
+        Log::error('❌ Order Not Found in Database', ['tamara_id' => $tamaraOrderId]);
+        return response()->json(['message' => 'Order not found'], 404);
+    }
+
+    // 4. تنفيذ الـ Authorise
+    if ($this->authoriseOrder($tamaraOrderId)) {
+        Log::info('✅ Authorised Success: ' . $tamaraOrderId);
+
+        // 5. تنفيذ الـ Capture
+        if ($this->captureOrder($tamaraOrderId, $order)) {
+            Log::info('✅✅ Captured Success: ' . $tamaraOrderId);
+
+            // 6. التحديث الفعلي لقاعدة البيانات
+            $order->update([
+                'payment' => 1,
+                'tamara_order_id' => $tamaraOrderId
+            ]);
+
+            Log::info('💰 Database Updated: Payment = 1');
+            return response()->json(['message' => 'Payment Completed']);
+        } else {
+            Log::error('❌ Capture Failed for: ' . $tamaraOrderId);
+        }
+    } else {
+        Log::error('❌ Authorise Failed for: ' . $tamaraOrderId);
+    }
+
+    return response()->json(['message' => 'Process failed'], 400);
+}
+
     /**
-     * Authorise Order (Required by Tamara)
+     * الخطوة الأولى: تفويض العملية
+     */
+  /**
+     * الخطوة الأولى: تفويض العملية
      */
     private function authoriseOrder($orderId)
     {
+        // الرابط: /v1/orders/{order_id}/authorise
         $response = Http::withToken($this->apiToken)
             ->post("{$this->apiUrl}/orders/{$orderId}/authorise");
 
-        if (!$response->successful()) {
-            Log::error('Tamara authorise failed', [
-                'status' => $response->status(),
-                'error'  => $response->json(),
-            ]);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Capture payment
-     */
-    private function capturePayment($orderId, $amount)
-    {
-        $response = Http::withToken($this->apiToken)
-            ->post("{$this->apiUrl}/payments/capture", [
-                'order_id'     => $orderId,
-                'total_amount' => [
-                    'amount'   => (float) $amount,
-                    'currency' => 'SAR'
-                ]
-            ]);
-
-        if (!$response->successful()) {
-            Log::error('Tamara capture failed', [
-                'status' => $response->status(),
-                'error'  => $response->json(),
-            ]);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Refund payment
-     */
-    public function refundPayment(Request $request)
-    {
-        $validated = $request->validate([
-            'order_id' => 'required|string', // Tamara Order ID
-            'amount'   => 'required|numeric',
-            'reason'   => 'nullable|string',
-        ]);
-
-        $response = Http::withToken($this->apiToken)
-            ->post("{$this->apiUrl}/payments/refund", [
-                'order_id'     => $validated['order_id'],
-                'total_amount' => [
-                    'amount'   => (float) $validated['amount'],
-                    'currency' => 'SAR'
-                ],
-                'comment' => $validated['reason'] ?? 'No reason provided',
-            ]);
-
-        if ($response->successful()) {
-            return response()->json(['message' => 'Refund successful']);
-        }
-
-        Log::error('Tamara refund failed', [
+        // 👇 هذا هو التعديل الهام جداً لمعرفة سبب المشكلة
+        Log::info('Tamara Authorise Full Response', [
+            'order_id' => $orderId,
             'status' => $response->status(),
-            'error'  => $response->json(),
+            'body' => $response->json() // هنا سيخبرنا تمارا لماذا فشل (مثلاً: رصيد غير كافٍ أو حالة الطلب خطأ)
         ]);
 
-        return response()->json(['message' => 'Refund failed'], $response->status());
+        return $response->successful();
     }
 
- /**
-     * Handle Success Redirect
-     * يتم استدعاؤها عندما يرجع المستخدم بنجاح من تمارا
+    /**
+     * الخطوة الثانية: تحصيل المبلغ (هنا التعديل الجوهري)
+     */
+private function captureOrder($orderId, $order)
+{
+    $payload = [
+        "order_id" => $orderId,
+        "total_amount" => [
+            "amount" => (float) $order->total,
+            "currency" => "SAR"
+        ],
+        "shipping_amount" => [
+            "amount" => (float) ($order->delivery_charge ?? 0),
+            "currency" => "SAR"
+        ],
+        "tax_amount" => [
+            "amount" => (float) ($order->vat ?? 0),
+            "currency" => "SAR"
+        ]
+    ];
+
+    // التعديل: إزالة v1 من المسار نهائياً ليصبح متوافقاً مع Checkout و Authorise
+    $response = Http::withToken($this->apiToken)
+        ->post("{$this->apiUrl}/payments/capture", $payload);
+
+    Log::info('Tamara Capture Response (No V1)', [
+        'status' => $response->status(),
+        'body' => $response->json()
+    ]);
+
+    return $response->successful();
+}
+
+/**
+     * رابط النجاح - Redirect من صفحة تمارا بعد الدفع
      */
     public function success(Request $request)
     {
-        // يمكنك هنا جلب الطلب وتحديث حالته أو فقط إرجاع رسالة نجاح
-        // ملاحظة: الويب هوك (handle) هو الأهم للتحديث، هنا فقط للمستخدم
-        
-        $orderId = $request->input('order_id'); // تمارا قد ترسل الـ ID هنا
-         $order = StoreOrder::findOrFail($orderId);
+        $tamaraOrderId = $request->input('order_id');
 
-        $order->update([
-            'payment' => 1,
-           
-        ]);
-        // مثال: إرجاع استجابة JSON أو توجيه لصفحة نجاح في الموقع
+        // البحث عن الطلب باستخدام رقم تمارا للتأكد
+        $order = StoreOrder::where('tamara_order_id', $tamaraOrderId)->first();
+
+        if ($order) {
+            // ملاحظة: الويب هوك غالباً سيكون قد حدث الحالة لـ 1 بالفعل
+            return response()->json([
+                'status' => true,
+                'message' => 'تمت عملية الدفع بنجاح',
+                'order_id' => $order->id
+            ]);
+        }
+
         return response()->json([
             'status' => true,
-            'message' => 'تمت عملية الدفع بنجاح، جاري مراجعة طلبك',
-            'order_id' => $orderId
+            'message' => 'شكراً لك، تم استلام الدفعة'
         ]);
-        
-       
     }
 
     /**
-     * Handle Failure Redirect
+     * رابط الفشل
      */
     public function failure(Request $request)
     {
+        Log::warning('Tamara Payment Failed Redirect', $request->all());
         return response()->json([
             'status' => false,
             'message' => 'فشلت عملية الدفع، يرجى المحاولة مرة أخرى'
@@ -224,7 +207,7 @@ class TamaraController extends Controller
     }
 
     /**
-     * Handle Cancel Redirect
+     * رابط الإلغاء
      */
     public function cancel(Request $request)
     {
