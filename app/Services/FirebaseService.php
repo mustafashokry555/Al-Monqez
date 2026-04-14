@@ -108,9 +108,8 @@ class FirebaseService
                 'message' => [
                     'token' => $token,
                     'data' => $data,
-                    'notification' => [
-                        'title' => $title,
-                        'body' => $body,
+                    'android' => [
+                        'priority' => 'high',
                     ],
                     'apns' => [
                         'headers' => [
@@ -119,6 +118,10 @@ class FirebaseService
                         ],
                         'payload' => [
                             'aps' => [
+                                'alert' => [
+                                    'title' => $title,
+                                    'body'  => $body,
+                                ],
                                 'sound' => $ios_sound,
                             ],
                         ],
