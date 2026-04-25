@@ -264,6 +264,13 @@ DB::commit();
 
 	public function tabbyPayment(Request $request, $order_id)
 {
+
+     // 1. تحديد المفتاح داخل الدالة مباشرة (عزل الإعدادات)
+        $mode = env('TABBY_MODE', 'test');
+        $apiKey = ($mode === 'live')
+            ? env('TABBY_API_KEY_LIVE')
+            : env('TABBY_API_KEY_TEST');
+
     $user = request()->user();
 
 
@@ -423,7 +430,7 @@ if ($order && $order->products) {
     // إرسال الطلب إلى Tabby
     $response = Http::withHeaders([
         'Content-Type' => 'application/json',
-        'Authorization' => 'Bearer ' . env('TABBY_API_KEY_TEST'),
+       'Authorization' => 'Bearer ' . $apiKey, // استخدام المتغير المعرف داخل الدالة
     ])->post('https://api.tabby.ai/api/v2/checkout', $payload);
 
     // معالجة الاستجابة
