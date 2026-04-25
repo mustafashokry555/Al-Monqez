@@ -110,6 +110,23 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="max_used_times">{{ __('admin.max_used_times') }}</label>
+                                    <input type="number" min="1"
+                                        class="form-control @error('max_used_times') is-invalid @enderror"
+                                        id="max_used_times" name="max_used_times"
+                                        placeholder="{{ __('admin.max_used_times_placeholder') }}"
+                                        value="{{ old('max_used_times') ?? $coupon->max_used_times }}">
+                                    @error('max_used_times')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label class="form-label" for="valid_from">{{ __('admin.valid_from') }}

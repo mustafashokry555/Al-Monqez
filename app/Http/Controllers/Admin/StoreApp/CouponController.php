@@ -56,7 +56,8 @@ class CouponController extends Controller
             'discount_percentage' => $request->discount_percentage,
             'max_discount_amount' => $request->max_discount_amount,
             'valid_from' => $request->valid_from,
-            'valid_until' => $request->valid_until
+            'valid_until' => $request->valid_until,
+            'max_used_times' => $request->max_used_times
         ]);
 
         session()->flash('success', __('messages.add_coupon'));
@@ -94,7 +95,8 @@ class CouponController extends Controller
             'discount_percentage' => $request->discount_percentage,
             'max_discount_amount' => $request->max_discount_amount,
             'valid_from' => $request->valid_from,
-            'valid_until' => $request->valid_until
+            'valid_until' => $request->valid_until,
+            'max_used_times' => $request->max_used_times
         ]);
 
         session()->flash('success', __('messages.update_coupon'));

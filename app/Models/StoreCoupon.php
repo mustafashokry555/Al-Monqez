@@ -18,7 +18,11 @@ class StoreCoupon extends Model
     public function isActive(): Attribute
     {
         return Attribute::make(
-            get: fn() => ($this->attributes['valid_until'] >= date('Y-m-d') && $this->attributes['valid_from'] <= date('Y-m-d')) ? 1 : 0
+            get: fn() => (
+                $this->attributes['valid_until'] >= date('Y-m-d') &&
+                $this->attributes['valid_from'] <= date('Y-m-d') &&
+                (is_null($this->attributes['max_used_times']) || $this->attributes['used_times'] < $this->attributes['max_used_times'])
+            ) ? 1 : 0
         );
     }
 
@@ -43,7 +47,8 @@ class StoreCoupon extends Model
             'discount_percentage' => 'required|numeric|min:0|max:100',
             'max_discount_amount' => 'required|numeric|min:0',
             'valid_from' => 'required|date',
-            'valid_until' => 'required|date|after_or_equal:valid_from'
+            'valid_until' => 'required|date|after_or_equal:valid_from',
+            'max_used_times' => 'nullable|integer|min:1'
         ];
     }
 }

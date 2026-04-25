@@ -55,6 +55,8 @@
                                 <th class="fw-bold">{{ __('admin.max_discount_amount') }}</th>
                                 <th class="fw-bold">{{ __('admin.valid_from') }}</th>
                                 <th class="fw-bold">{{ __('admin.valid_until') }}</th>
+                                <th class="fw-bold">{{ __('admin.used_times') }}</th>
+                                <th class="fw-bold">{{ __('admin.max_used_times') }}</th>
                                 <th class="fw-bold">{{ __('admin.status') }}</th>
                                 <th class="fw-bold">{{ __('admin.actions') }}</th>
                             </tr>
@@ -76,6 +78,8 @@
                                     <td class="align-middle">{{ $coupon->max_discount_amount }}</td>
                                     <td class="align-middle">{{ $coupon->valid_from }}</td>
                                     <td class="align-middle">{{ $coupon->valid_until }}</td>
+                                    <td class="align-middle">{{ $coupon->used_times }}</td>
+                                    <td class="align-middle">{{ $coupon->max_used_times ?? __('admin.unlimited') }}</td>
                                     <td
                                         class="align-middle @if ($coupon->is_active) bg-success @else bg-danger @endif text-white">
                                         {{ __("admin.active_$coupon->is_active") }}

@@ -216,6 +216,7 @@ $coupon_discount_value=0;
                     'discount_percentage' => $coupon->discount_percentage,
                     'max_discount_amount' => $coupon->max_discount_amount
                 ]);
+                StoreCoupon::where('id', $coupon->id)->increment('used_times');
             }
 
         	if ($request->payment_method == "tabby") {
